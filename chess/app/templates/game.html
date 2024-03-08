@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Шахматная доска</title>
+<style>
+    body {
+    font-family: Arial, sans-serif; /* Установка шрифта для всей страницы */
+    margin: 0;
+    display: flex;
+    flex-direction: column; /* Структурирование содержимого в столбик */
+    justify-content: center; /* Центрирование содержимого по вертикали */
+    align-items: center; /* Центрирование содержимого по горизонтали */
+    height: 100vh; /* Высота всего видимого экрана */
+  }
+
+
+  .chessboard {
+    display: flex;
+    flex-wrap: wrap;
+    width: 600px; /* Увеличенный размер доски */
+    height: 600px;
+    margin: 60px auto; /* Выравнивание по центру */
+  }
+  .chessboard > div {
+    width: 75px; /* Увеличенный размер клетки */
+    height: 75px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .black {
+    background-color: #769656;
+  }
+  .white {
+    background-color: #eeeed2;
+  }
+  .chesspiece {
+    cursor: pointer;
+    width: 90%; /* Размер фигур */
+    height: 90%;
+  }
+  /* Стилизация фигур может быть добавлена сюда */
+    .game-info {
+  width: 400px; /* ширина окна информации */
+  height: 700px; /* высота окна информации */
+  position: absolute;/* фиксированное позиционирование относительно окна браузера */
+  bottom: 10px; /* отступ снизу */
+  right: 30px; /* отступ справа */
+  background-color: #333; /* цвет фона окна информации */
+  color: #fff; /* цвет текста */
+  padding: 10px; /* внутренние отступы вокруг содержимого */
+  border-radius: 5px; /* скругление углов */
+  display: flex; /* использование flexbox для внутреннего содержимого */
+  align-items: center; /* центрирование содержимого по вертикали */
+  justify-content: space-between; /* распределение содержимого по горизонтали */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.5); /* тень для окна */
+}
+.game-info .story {
+  width: 400px; /* ширина окна информации */
+  height: 300px; /* высота окна информации */
+  background-color: #333; /* цвет фона окна информации */
+  color: #fff; /* цвет текста */
+  padding: 10px; /* внутренние отступы вокруг содержимого */
+  border-radius: 5px; /* скругление углов */
+  align-items: center; /* центрирование содержимого по вертикали */
+  justify-content: space-between; /* распределение содержимого по горизонтали */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.5); /* тень для окна */
+}
+  .user-info-bottom {
+  width: 580px; /* ширина окна информации */
+  height: 40px; /* высота окна информации */
+  position: absolute;/* фиксированное позиционирование относительно окна браузера */
+  bottom: 5px; /* отступ снизу */
+  right: 0 px; /* отступ справа */
+  background-color: #333; /* цвет фона окна информации */
+  color: #fff; /* цвет текста */
+  padding: 10px; /* внутренние отступы вокруг содержимого */
+  border-radius: 5px; /* скругление углов */
+  display: flex; /* использование flexbox для внутреннего содержимого */
+  align-items: center; /* центрирование содержимого по вертикали */
+  justify-content: space-between; /* распределение содержимого по горизонтали */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.5); /* тень для окна */
+}
+.user-info-top {
+  width: 580px; /* ширина окна информации */
+  height: 40px; /* высота окна информации */
+  position: absolute;/* фиксированное позиционирование относительно окна браузера */
+  top: 5px; /* отступ снизу */
+  right: 0 px; /* отступ справа */
+  background-color: #333; /* цвет фона окна информации */
+  color: #fff; /* цвет текста */
+  padding: 10px; /* внутренние отступы вокруг содержимого */
+  border-radius: 5px; /* скругление углов */
+  display: flex; /* использование flexbox для внутреннего содержимого */
+  align-items: center; /* центрирование содержимого по вертикали */
+  justify-content: space-between; /* распределение содержимого по горизонтали */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.5); /* тень для окна */
+}
+.user-info img {
+  width: 30px; /* размер изображения пользователя */
+  height: 30px; /* размер изображения пользователя */
+  border-radius: 50%; /* делаем изображение круглым */
+}
+.user-info .user-details {
+  margin-left: 10px; /* отступ слева для текста */
+}
+.user-info .user-time {
+  font-size: 0.9em; /* размер шрифта для времени */
+}
+
+</style>
+</head>
+<body>
+
+</div>
+<div  class="game-info">
+  <div class="story"></div>
+</div>
+
+<div class="user-info-top">
+  <img src="path_to_user_image.jpg" alt="User Image"> <!-- Путь к изображению пользователя -->
+  <div class="user-details">
+    <div class="user-name">Guest9540135630</div>
+    <div class="user-status">Online</div>
+  </div>
+  <div class="user-time">9:56</div>
+</div>
+<div id="chessboard" class="chessboard"></div>
+
+<div class="user-info-bottom">
+  <img src="path_to_user_image.jpg" alt="User Image"> <!-- Путь к изображению пользователя -->
+  <div class="user-details">
+    <div class="user-name">Guest9540135630</div>
+    <div class="user-status">Online</div>
+  </div>
+  <div class="user-time">9:56</div>
+
+<script>
+// Функция для создания доски и размещения фигур
+function createChessBoard() {
+  const board = document.getElementById('chessboard');
+  for (let i = 0; i < 64; i++) {
+    const square = document.createElement('div');
+    const isBlack = (Math.floor(i / 8) + i) % 2 === 0;
+    square.className = isBlack ? 'black' : 'white';
+    board.appendChild(square);
+  }
+
+  // Добавление фигур на доску
+  // Здесь нужно будет добавить код, который будет создавать фигуры и добавлять их на доску
+}
+
+createChessBoard();
+
+// Добавить код для обработки перетаскивания
+// Здесь нужно будет добавить код, который позволит перетаскивать фигуры с помощью мыши
+
+</script>
+
+</body>
+</html>
