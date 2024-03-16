@@ -1,10 +1,4 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-<meta charset="UTF-8">
-<title>Шахматная доска</title>
-<style>
-    body {
+body {
     font-family: Arial, sans-serif; /* Установка шрифта для всей страницы */
     margin: 0;
     display: flex;
@@ -13,8 +7,6 @@
     align-items: center; /* Центрирование содержимого по горизонтали */
     height: 100vh; /* Высота всего видимого экрана */
   }
-
-
   .chessboard {
     display: flex;
     flex-wrap: wrap;
@@ -22,7 +14,6 @@
     height: 600px;
     margin: 60px auto; /* Выравнивание по центру */
   }
-
   .chessboard > div {
     width: 75px; /* Увеличенный размер клетки */
     height: 75px;
@@ -136,142 +127,3 @@
 .user-info .user-time {
   font-size: 0.9em; /* размер шрифта для времени */
 }
-
-</style>
-</head>
-<body>
-
-</div>
-<div  class="game-info">
-  <div class="story"></div>
-</div>
-<div  class="game-panel">
-    <img src="path_to_user_image.jpg" alt="User Image"> <!-- Путь к изображению пользователя -->
-
-</div>
-<div class="user-info-top">
-  <img src="path_to_user_image.jpg" alt="User Image"> <!-- Путь к изображению пользователя -->
-  <div class="user-details">
-    <div class="user-name">Guest9540135630</div>
-    <div class="user-status">Online</div>
-  </div>
-  <div class="user-time">9:56</div>
-</div>
-<div id="chessboard" class="chessboard"></div>
-
-<div class="user-info-bottom">
-  <img src="path_to_user_image.jpg" alt="User Image"> <!-- Путь к изображению пользователя -->
-  <div class="user-details">
-    <div class="user-name">Guest9540135630</div>
-    <div class="user-status">Online</div>
-  </div>
-  <div class="user-time">9:56</div>
-
-<script>
-function createChessBoard() {
-  const board = document.getElementById('chessboard');
-  for (let i = 0; i < 64; i++) {
-    const square = document.createElement('div');
-    const isBlack = (Math.floor(i / 8) + i) % 2 === 0;
-    square.className = isBlack ? 'black' : 'white';
-    board.appendChild(square);
-  }
-
-  // Функция для добавления фигуры на доску
-  function addPiece(piece, position) {
-  const pieceElement = document.createElement('img');
-  pieceElement.src = '/static/figures/' + piece + '.png'; // Составляем путь изображения
-  pieceElement.className = 'chesspiece';
-  pieceElement.draggable = true; // Установить элемент как перетаскиваемый
-  pieceElement.addEventListener('dragstart', dragStart); // Добавить обработчик для начала перетаскивания
-  board.children[position].appendChild(pieceElement);
-}
-
-
-  // Добавляем пешки на доску для белых
-  for (let i = 8; i < 16; i++) {
-    addPiece('pawn_white', i);
-  }
-
-  // Добавляем пешки на доску для черных
-  for (let i = 48; i < 56; i++) {
-    addPiece('pawn_black', i);
-  }
-
-  // Добавляем остальные фигуры, пример:
-  // Белые фигуры
-  addPiece('rook_white', 0);   // Ладья
-  addPiece('knight_white', 1); // Конь
-  addPiece('bishop_white', 2); // Слон
-  addPiece('queen_white', 3);  // Королева
-  addPiece('king_white', 4);   // Король
-  addPiece('bishop_white', 5);   // Слон
-  addPiece('knight_white', 6); // Конь
-  addPiece('rook_white', 7);   // Ладья
-
-
-
-  // ... добавьте другие белые фигуры
-
-  // Черные фигуры
-  addPiece('rook_black', 56);  // Ладья
-  addPiece('knight_black', 57); // Конь
-  addPiece('bishop_black', 58); // Слон
-  addPiece('queen_black', 59); // Королева
-  addPiece('king_black', 60);  // Король
-  addPiece('bishop_black', 61); // Слон
-  addPiece('knight_black', 62); // Конь
-  addPiece('rook_black', 63);  // Ладья
-
-
-let selectedPiece = null; // Переменная для хранения перетаскиваемой фигуры
-
-  // Функция для начала перетаскивания
-  function dragStart(e) {
-    selectedPiece = e.target;
-    e.dataTransfer.setData('text/plain', ''); // Для Firefox
-  }
-
-  // Функция для перетаскивания над потенциальным местом для сброса
-  function dragOver(e) {
-    e.preventDefault(); // Позволяет сбросить
-  }
-
-  // Функция для сброса фигуры
-  function drop(e) {
-  e.preventDefault();
-  // Добавить проверку, является ли цель сброса клеткой доски, а не другой фигурой
-  const target = e.target.classList.contains('chesspiece') ? e.target.parentElement : e.target;
-  if (selectedPiece && target.className.includes('white') || target.className.includes('black')) {
-    target.appendChild(selectedPiece);
-    selectedPiece = null; // Очищаем выбранную фигуру после сброса
-  }
-}
-
-
-  // Добавляем обработчики для фигур
-  const pieces = document.querySelectorAll('.chesspiece');
-  pieces.forEach(piece => {
-    piece.setAttribute('draggable', true);
-    piece.addEventListener('dragstart', dragStart);
-  });
-
-  // Добавляем обработчики для клеток доски
-  const cells = document.querySelectorAll('.chessboard > div');
-  cells.forEach(cell => {
-    cell.addEventListener('dragover', dragOver);
-    cell.addEventListener('drop', drop);
-    });
-}
-
-createChessBoard();
-
-
-
-// Добавить код для обработки перетаскивания
-// Здесь нужно будет добавить код, который позволит перетаскивать фигуры с помощью мыши
-
-</script>
-</div>
-</body>
-</html>

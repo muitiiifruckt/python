@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        {% load static %}
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Главная</title>
+        <link rel="stylesheet" href="{% static 'css/index.css' %}">
+    </head>
+<body>
+    <img src="путь_к_вашему_изображению" alt="Шахматы" style="width: 300px; height: auto;">
+    <div class="buttons">
+        <a href="http://127.0.0.1:8000/game" class="button">  Играть  </a>
+        <a href="http://127.0.0.1:8000/contact" class="button">Настройки</a>
+        <a href="http://127.0.0.1:8000/news" class="button">  Новости </a>
+        <a href="http://127.0.0.1:8000/about" class="button">  О сайте </a>
+
+    </div>
+    <audio id="buttonSound" src="{% static 'sounds/butn_sound_1.mp3' %}" preload="auto"></audio>
+    <script src="{% static 'js/index.js' %}"></script>
+
+
+</body>
+</html>

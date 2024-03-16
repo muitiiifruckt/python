@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Шахматная доска</title>
+    <link rel="stylesheet" href="{% static 'css/game.css' %}">
+
+  </head>
+<body>
+<div class="game-info">
+  <div class="story"></div>
+</div>
+<div  class="game-panel">
+    <img src="path_to_user_image.jpg" alt="User Image"> <!-- Путь к изображению пользователя -->
+</div>efsf
+<div class="user-info-top">
+  <img src="path_to_user_image.jpg" alt="User Image"> <!-- Путь к изображению пользователя -->
+  <div class="user-details">
+    <div class="user-name">Guest9540135630</div>
+    <div class="user-status">Online</div>
+  </div>
+  <div class="user-time">9:56</div>
+</div>
+<div id="chessboard" class="chessboard"></div>
+
+<div class="user-info-bottom">
+  <img src="path_to_user_image.jpg" alt="User Image"> <!-- Путь к изображению пользователя -->
+  <div class="user-details">
+    <div class="user-name">Guest9540135630</div>
+    <div class="user-status">Online</div>
+  </div>
+  <div class="user-time">9:56</div>
+</div>>
+<script src="{% static 'js/game.js' %}"></script>
+
+</body>
+</html>
