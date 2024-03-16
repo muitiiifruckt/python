@@ -21,6 +21,11 @@ body {
     justify-content: center;
     align-items: center;
   }
+  .chessboard > div:hover  {
+    background-color: #333333;
+}
+
+
   .black {
     background-color: #769656;
   }
@@ -32,12 +37,18 @@ body {
   width: 90%; /* Задаем ширину изображения равной ширине клетки */
   height: 90%; /* Высота будет рассчитываться автоматически */
   object-fit: contain; /* Убеждаемся, что изображение сохранит свои пропорции */
-  pointer-events: none; /* Предотвращаем взаимодействие с изображением напрямую */
-}
-  .chesspiece:hover {
-  transform: scale(0.9); /* уменьшаем размер кнопки при наведении */
 
 }
+.chesspiece {
+    transition: transform 0.4s ease; /* Анимация изменения размера */
+}
+
+.chesspiece:hover {
+    transform: scale(0.8); /* Уменьшение размера при наведении */
+}
+
+
+
   /* Стилизация фигур может быть добавлена сюда */
     .game-info {
   width: 400px; /* ширина окна информации */
