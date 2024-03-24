@@ -1,6 +1,12 @@
 import chess
 
 
+def handle_move(from_coord, to_coord):
+    return {
+        "move_made": True,
+        "status": "success",
+        "message": "Ход успешно выполнен"
+    }
 class ChessLogic:
     def __init__(self):
         self.board = chess.Board()
@@ -18,5 +24,7 @@ class ChessLogic:
             self.board.push(move)
             return True
         return False
+    def hangle_move(self):
+        pass
 
     # Другие методы для управления игровой логикой...

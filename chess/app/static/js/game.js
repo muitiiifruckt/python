@@ -75,7 +75,7 @@ $(document).ready(function() {
         document.querySelectorAll('.chesspiece').forEach(piece => {
             piece.addEventListener('dragstart', (e) => {
                 draggedElement = e.target;
-                e.target.style.opacity = '0.5'; // Делаем фигуру полупрозрачной при перетаскивании
+                e.target.style.opacity = '0.1'; // Делаем фигуру полупрозрачной при перетаскивании
                 // Подсветка возможных ходов или клеток может быть добавлена здесь
                 e.dataTransfer.setDragImage(e.target, 75/2, 75/2);
 
@@ -84,28 +84,58 @@ $(document).ready(function() {
             piece.addEventListener('dragend', (e) => {
                 e.target.style.opacity = ''; // Возвращаем нормальную прозрачность фигуре
                 // Убираем подсветку клеток
+
             });
         });
 
-        document.querySelectorAll('#chessboard div').forEach(square => {
-            square.addEventListener('dragover', (e) => {
-                e.preventDefault();
-            });
 
-            square.addEventListener('drop', (e) => {
-                e.preventDefault();
-                const targetSquare = e.target.closest('.black, .white'); // Находим клетку, вне зависимости от цели события
-                if (draggedElement && targetSquare) {
-                    while (targetSquare.firstChild)
-                    {
-                        targetSquare.removeChild(targetSquare.firstChild); // съединение фигуры
-                    }
-                    targetSquare.appendChild(draggedElement);
-                    draggedElement = null;
+         document.querySelectorAll('#chessboard div').forEach(square => {
+        square.addEventListener('drop', (e) => {
+            e.preventDefault();
+            console.log(1);
 
+            const targetSquare = e.target.closest('.black, .white');
+            console.log(1);
+            if (draggedElement && targetSquare) {
+                while (targetSquare.firstChild) {
+                    targetSquare.removeChild(targetSquare.firstChild); // Удаляем фигуру с клетки, если таковая имеется
                 }
-            });
+                targetSquare.appendChild(draggedElement); // Помещаем перетаскиваемую фигуру на клетку
+
+                // Запоминаем исходные и конечные координаты
+                const fromCoord = draggedElement.getAttribute('data-coord');
+                const toCoord = targetSquare.getAttribute('data-coord');
+
+                // Сбрасываем ссылку на перетаскиваемый элемент
+                draggedElement.style.opacity = ''; // Возвращаем нормальную прозрачность фигуре
+                draggedElement = null;
+                console.log(1);
+                // Отправляем данные о ходе на сервер через AJAX
+                $.ajax({
+                    url: '/make_move', // URL, на который будет отправлен запрос
+                    type: 'POST',
+                    data: {
+                        from: fromCoord,
+                        to: toCoord,
+                        // Можно добавить дополнительные данные, если необходимо
+                    },
+                    success: function(response) {
+                    if(response.move_made) {
+                        console.log(response.message); // Отображаем сообщение об успешном выполнении хода
+                        // Можете добавить логику для обновления UI здесь
+                    } else {
+                        alert(response.message); // Эта ветка не будет выполняться, пока используется заглушка
+                    }
+                },
+
+                    error: function(xhr, status, error) {
+                        // Здесь вы можете обработать ошибки запроса
+                        // Например, вывести сообщение об ошибке
+                    }
+                });
+            }
         });
+    });
     }
 
     createChessBoard();
