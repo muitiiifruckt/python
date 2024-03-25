@@ -6,40 +6,40 @@ $(document).ready(function() {
             console.error('Chessboard element not found');
             return;
         }
-            for (let i = 0; i < 64; i++) {
-        const square = document.createElement('div');
-        const isBlack = (Math.floor(i / 8) + i) % 2 === 0;
-        square.className = isBlack ? 'black' : 'white';
+        for (let i = 0; i < 64; i++) {
+            const square = document.createElement('div');
+            const isBlack = (Math.floor(i / 8) + i) % 2 === 0;
+            square.className = isBlack ? 'black' : 'white';
 
-        // Вычисляем координаты
-        const x = 'abcdefgh'[i % 8];
-        const y = 8 - Math.floor(i / 8);
-        square.setAttribute('data-coord', `${x}${y}`);
+            // Вычисляем координаты
+            const x = 'abcdefgh'[i % 8];
+            const y = 8 - Math.floor(i / 8);
+            square.setAttribute('data-coord', `${x}${y}`);
 
-        board.appendChild(square);
-    }
+            board.appendChild(square);
+        }
 
-            // Функция для добавления фигуры на доску
-    function addPiece(piece, position) {
-        const pieceElement = document.createElement('img');
-        pieceElement.src = '/static/figures/' + piece + '.png';
-        pieceElement.className = 'chesspiece';
-        pieceElement.draggable = true;
+        // Функция для добавления фигуры на доску
+        function addPiece(piece, position) {
+            const pieceElement = document.createElement('img');
+            pieceElement.src = '/static/figures/' + piece + '.png';
+            pieceElement.className = 'chesspiece';
+            pieceElement.draggable = true;
 
-        // Вычисляем координаты
-        const x = 'abcdefgh'[position % 8];
-        const y = 8 - Math.floor(position / 8);
-        const coord = `${x}${y}`;
+            // Вычисляем координаты
+            const x = 'abcdefgh'[position % 8];
+            const y = 8 - Math.floor(position / 8);
+            const coord = `${x}${y}`;
 
-        // Устанавливаем id фигуры на основе её позиции
-        const pieceId = `${piece}-${coord}`;
-        pieceElement.id = pieceId;
+            // Устанавливаем id фигуры на основе её позиции
+            const pieceId = `${piece}-${coord}`;
+            pieceElement.id = pieceId;
 
-        // Устанавливаем атрибут data-coord для фигуры
-        pieceElement.setAttribute('data-coord', coord);
+            // Устанавливаем атрибут data-coord для фигуры
+            pieceElement.setAttribute('data-coord', coord);
 
-        board.children[position].appendChild(pieceElement);
-    }
+            board.children[position].appendChild(pieceElement);
+        }
 
 
         const pieces = ['pawn_white', 'pawn_black', 'rook_white', 'knight_white', 'bishop_white', 'queen_white', 'king_white', 'bishop_white', 'knight_white', 'rook_white', 'rook_black', 'knight_black', 'bishop_black', 'queen_black', 'king_black', 'bishop_black', 'knight_black', 'rook_black'];
@@ -75,68 +75,86 @@ $(document).ready(function() {
         document.querySelectorAll('.chesspiece').forEach(piece => {
             piece.addEventListener('dragstart', (e) => {
                 draggedElement = e.target;
-                e.target.style.opacity = '0.1'; // Делаем фигуру полупрозрачной при перетаскивании
+                e.target.style.opacity = '0.1'; // Делаем фигуру полупрозрачной при перетаскивани
+                e.dataTransfer.setDragImage(e.target, 75 / 2, 75 / 2);
                 // Подсветка возможных ходов или клеток может быть добавлена здесь
-                e.dataTransfer.setDragImage(e.target, 75/2, 75/2);
 
             });
 
             piece.addEventListener('dragend', (e) => {
                 e.target.style.opacity = ''; // Возвращаем нормальную прозрачность фигуре
                 // Убираем подсветку клеток
+                // здесь должна быть запись ходов
+
 
             });
         });
 
+        document.querySelectorAll('#chessboard div').forEach(square => {
+            square.addEventListener('dragover', (e) => {
+                e.preventDefault(); // Необходимо для возможности drop
+                // Подсветка клетки, если нужно
+            });
 
-         document.querySelectorAll('#chessboard div').forEach(square => {
-        square.addEventListener('drop', (e) => {
-            e.preventDefault();
-            console.log(1);
+            square.addEventListener('drop', (e) => {
+                e.preventDefault();
+                const targetSquare = e.target.closest('.black, .white'); // Находим клетку
 
-            const targetSquare = e.target.closest('.black, .white');
-            console.log(1);
-            if (draggedElement && targetSquare) {
-                while (targetSquare.firstChild) {
-                    targetSquare.removeChild(targetSquare.firstChild); // Удаляем фигуру с клетки, если таковая имеется
+                if (draggedElement && targetSquare) {
+                    // Определяем координаты from и to
+                    const fromCoord = draggedElement.parentElement.getAttribute('data-coord');
+                    const toCoord = targetSquare.getAttribute('data-coord');
+
+                    // Здесь AJAX запрос на сервер
+                    fetch('http://127.0.0.1:8000/make_move', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCookie('csrftoken') // Получаем CSRF токен
+                        },
+                        body: JSON.stringify({from: fromCoord, to: toCoord})
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.move_made) {
+                                 console.log(data.message)
+                                // Если ход возможен, перемещаем фигуру
+                                while (targetSquare.firstChild) {
+                                    targetSquare.removeChild(targetSquare.firstChild); // Съединение фигуры
+                                }
+                                targetSquare.appendChild(draggedElement);
+                            } else {
+                                console.log(data.message)
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                        })
+                        .finally(() => {
+                            draggedElement.style.opacity = ''; // Возвращаем нормальную прозрачность
+                            draggedElement = null; // Сбрасываем ссылку на перетаскиваемый элемент
+                        });
                 }
-                targetSquare.appendChild(draggedElement); // Помещаем перетаскиваемую фигуру на клетку
-
-                // Запоминаем исходные и конечные координаты
-                const fromCoord = draggedElement.getAttribute('data-coord');
-                const toCoord = targetSquare.getAttribute('data-coord');
-
-                // Сбрасываем ссылку на перетаскиваемый элемент
-                draggedElement.style.opacity = ''; // Возвращаем нормальную прозрачность фигуре
-                draggedElement = null;
-                console.log(1);
-                // Отправляем данные о ходе на сервер через AJAX
-                $.ajax({
-                    url: '/make_move', // URL, на который будет отправлен запрос
-                    type: 'POST',
-                    data: {
-                        from: fromCoord,
-                        to: toCoord,
-                        // Можно добавить дополнительные данные, если необходимо
-                    },
-                    success: function(response) {
-                    if(response.move_made) {
-                        console.log(response.message); // Отображаем сообщение об успешном выполнении хода
-                        // Можете добавить логику для обновления UI здесь
-                    } else {
-                        alert(response.message); // Эта ветка не будет выполняться, пока используется заглушка
-                    }
-                },
-
-                    error: function(xhr, status, error) {
-                        // Здесь вы можете обработать ошибки запроса
-                        // Например, вывести сообщение об ошибке
-                    }
-                });
-            }
+            });
         });
-    });
+
+        // Функция для получения значения CSRF токена
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
     }
+
 
     createChessBoard();
 });

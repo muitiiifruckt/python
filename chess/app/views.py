@@ -5,7 +5,6 @@ from .game_logic import ChessLogic
 from .game_logic import handle_move  # Предполагается, что у вас есть функция для обработки хода
 
 
-
 def make_move(request):
     if request.method == 'POST':
         from_coord = request.POST.get('from')
