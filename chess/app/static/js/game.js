@@ -38,6 +38,7 @@ $(document).ready(function() {
             // Устанавливаем атрибут data-coord для фигуры
             pieceElement.setAttribute('data-coord', coord);
 
+
             board.children[position].appendChild(pieceElement);
         }
 
