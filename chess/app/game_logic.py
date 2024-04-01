@@ -6,8 +6,6 @@ def handle_move(from_coord, to_coord):
     try:
         # Преобразовать координаты в объект хода python-chess
         move = ch.Move.from_uci(f"{from_coord}{to_coord}")
-
-
         # Проверить, является ли ход легальным
         if move in board.legal_moves:
             board.push(move)  # Сделать ход на доске
