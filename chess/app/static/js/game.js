@@ -1,4 +1,6 @@
 $(document).ready(function() {
+    let end_of_game = false;
+    let promotion ;
     function createChessBoard() {
         const board = document.getElementById('chessboard');
         // Убедитесь, что board не null
@@ -97,6 +99,7 @@ $(document).ready(function() {
 
 
         let draggedElement = null;
+
         document.querySelectorAll('.chesspiece').forEach(piece => {
             piece.addEventListener('dragstart', (e) => {
                 draggedElement = e.target;
@@ -114,6 +117,20 @@ $(document).ready(function() {
 
             });
         });
+        document.querySelectorAll('.promotion-choice').forEach(button => {
+          button.addEventListener('click', function() {
+            const chosenPiece = this.getAttribute('data-piece');
+
+
+            // Скрываем модальное окно после выбора
+            document.getElementById('promotionModal').style.display = 'none';
+          });
+        });
+
+        // Функция для отображения модального окна выбора фигуры
+        function showPromotionModal() {
+          document.getElementById('promotionModal').style.display = 'block';
+        }
 
         document.querySelectorAll('#chessboard div').forEach(square => {
             square.addEventListener('dragover', (e) => {
@@ -125,12 +142,18 @@ $(document).ready(function() {
                 e.preventDefault();
                 const targetSquare = e.target.closest('.black, .white'); // Находим клетку
 
-                if (draggedElement && targetSquare) {
+                if (draggedElement && targetSquare && !end_of_game) {
                     // Определяем координаты from и to
                     const fromCoord = draggedElement.parentElement.getAttribute('data-coord');
-                    const toCoord = targetSquare.getAttribute('data-coord');
+                    let toCoord = targetSquare.getAttribute('data-coord');
                     const id = draggedElement.id;
-
+                    // Проверяем, достигла ли пешка последней горизонтали
+                      if (isPawnPromotion(fromCoord, toCoord, id)) {
+                        // Показываем модальное окно для выбора фигуры
+                        showPromotionModal();
+                      }
+                        if(isPawnPromotion(fromCoord,toCoord,id))
+                        {toCoord +=promotion;}
                     // Здесь AJAX запрос на сервер
                     fetch('http://127.0.0.1:8000/make_move', {
                         method: 'POST',
@@ -138,12 +161,13 @@ $(document).ready(function() {
                             'Content-Type': 'application/json',
                             'X-CSRFToken': getCookie('csrftoken') // Получаем CSRF токен
                         },
-                        body: JSON.stringify({from: fromCoord, to: toCoord})
+                            body: JSON.stringify({from: fromCoord, to: toCoord,promotion: promotion })
+
                     })
                         .then(response => response.json())
                         .then(data => {
                             if (data.move_made) {
-
+                                console.log(data.chekmate)
 
                                 // Если ход возможен, перемещаем фигуру
                                 while (targetSquare.firstChild) {
@@ -205,8 +229,29 @@ $(document).ready(function() {
                                     const moveString = fromCoord + toCoord; // Например, 'e2e4'
                                     addMoveToStory(moveString);
                                 }
+                                if(data.en_passant_move)
+                                {
 
-                            } else {
+                                    removeEnPassantCapture(fromCoord,toCoord)
+                                }
+                                if(data.chekmate)
+                                {
+                                    showCheckmateModal("Шах и мат")
+                                    end_of_game = true;
+                                }
+                                if(data.stalemate)
+                                {
+                                    showCheckmateModal("Пат")
+                                    end_of_game = true;
+                                }
+                                if(data.is_insufficient_material)
+                                {
+                                    showCheckmateModal("Ничья")
+                                    end_of_game = true;
+                                }
+
+
+                                } else {
                                 console.log(data.message)
                             }
                         })
@@ -283,6 +328,82 @@ $(document).ready(function() {
           // Переключаем флаг очереди хода
           isWhiteTurn = !isWhiteTurn;
         }
+        function showCheckmateModal(title) // вывод сообщениея об итогах игры
+        {
+            var modalTitle = document.getElementById('modalTitle');
+            // Получаем модальное окно
+              modalTitle.innerText = title;
+
+            var modal = document.getElementById('checkmateModal');
+
+            // Получаем элемент <span>, который закрывает модальное окно
+            var closeButton = document.getElementsByClassName('close-button')[0];
+
+            // Когда пользователь кликает на <span> (x), закрываем модальное окно
+            closeButton.onclick = function() {
+              modal.style.display = 'none';
+            }
+            // При нажатии вне модального окна, оно закроется
+            window.onclick = function(event) {
+              if (event.target == modal) {
+                modal.style.display = 'none';
+              }
+            }
+            modal.style.display = 'block';
+        }
+        function removePieceAtSquare(square) {
+            const squareElement = document.querySelector(`[data-coord="${square}"]`);
+            if (squareElement && squareElement.firstChild) {
+                squareElement.removeChild(squareElement.firstChild);
+            }
+        }
+        function removeEnPassantCapture(fromCoord, toCoord) {
+            // Получаем столбец (файл) и горизонталь (ранг) из координаты конечного хода
+            const toFile = toCoord[0]; // Например, 'd'
+            let toRank = parseInt(toCoord[1], 10); // Например, 5
+
+            // Определяем горизонталь съеденной пешки на основе направления хода
+            if (fromCoord[1] > toCoord[1]) {
+                // Для черных пешек, съеденная пешка находится на одну горизонталь выше
+                toRank += 1;
+            } else {
+                // Для белых пешек, съеденная пешка находится на одну горизонталь ниже
+                toRank -= 1;
+            }
+
+            // Строим координаты съеденной пешки
+            const capturedPawnCoord = `${toFile}${toRank}`;
+
+            // Удаляем съеденную пешку
+            removePieceAtSquare(capturedPawnCoord);
+        }
+        function isPawnPromotion(fromCoord, toCoord, id)
+        {
+          // Проверяем, является ли элемент пешкой
+          const isPawn = id.startsWith('pawn_');
+          if (!isPawn) {
+            return false;
+          }
+
+          // Определяем цвет пешки по ID
+          const isWhite = id.includes('white');
+          const isBlack = id.includes('black');
+
+          // Получаем номер горизонтали из координаты конечного хода
+          const rank = toCoord[1];
+
+          // Проверяем, достигла ли пешка последней горизонтали
+          if ((isWhite && rank === '8') || (isBlack && rank === '1')) {
+            return true;
+          }
+
+          return false;
+        }
+
+
+
+
+
 
 
 

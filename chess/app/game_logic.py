@@ -2,16 +2,27 @@ import chess3 as ch
 
 board = ch.Board()
 
-def handle_move(from_coord, to_coord):
+def handle_move(from_coord, to_coord, promotion=None):
     try:
         # Преобразовать координаты в объект хода python-chess
-        move = ch.Move.from_uci(f"{from_coord}{to_coord}")
-        # Проверить, является ли ход легальным
+        move_uci = f"{from_coord}{to_coord}"
+        if promotion:
+            move_uci += promotion  # Добавляем символ превращения к UCI хода, если он есть
+        move = ch.Move.from_uci(move_uci)        # Проверить, является ли ход легальным
         if move in board.legal_moves:
+            en_passant_move = board.is_en_passant(move)
             board.push(move)  # Сделать ход на доске
+            chekmate = board.is_checkmate()
+            stalemate = board.is_stalemate()
+            is_insufficient_material = board.is_insufficient_material()
+
             return {
                 "move_made": True,
                 "status": "success",
+                "chekmate": chekmate,
+                "stalemate": stalemate,
+                "is_insufficient_material":is_insufficient_material,
+                "en_passant_move": en_passant_move,
                 "message": "Ход успешно выполнен"
             }
         else:
