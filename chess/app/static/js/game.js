@@ -1,8 +1,45 @@
+let promotion ;
+let tempFromCoord, tempToCoord, tempId,draggedElement_2,targetSquare,board;
+
+    function makeDraggable(element) {
+    element.addEventListener('dragstart', (e) => {
+        draggedElement = e.target;
+        e.target.style.opacity = '0.1';
+        e.dataTransfer.setDragImage(e.target, 75 / 2, 75 / 2);
+    });
+
+    element.addEventListener('dragend', (e) => {
+        e.target.style.opacity = '';
+    });
+}
+function addPiece(piece, position) {
+            const pieceElement = document.createElement('img');
+            pieceElement.src = '/static/figures/' + piece + '.png';
+            pieceElement.className = 'chesspiece';
+            pieceElement.draggable = true;
+
+            // Вычисляем координаты
+            const x = 'abcdefgh'[position % 8];
+            const y = 8 - Math.floor(position / 8);
+            const coord = `${x}${y}`;
+
+            // Устанавливаем id фигуры на основе её позиции
+            const pieceId = `${piece}-${coord}`;
+            pieceElement.id = pieceId;
+
+            // Устанавливаем атрибут data-coord для фигуры
+            pieceElement.setAttribute('data-coord', coord);
+            makeDraggable(pieceElement);
+
+
+
+            board.children[position].appendChild(pieceElement);
+        }
 $(document).ready(function() {
     let end_of_game = false;
-    let promotion ;
+
     function createChessBoard() {
-        const board = document.getElementById('chessboard');
+        board = document.getElementById('chessboard');
         // Убедитесь, что board не null
         if (!board) {
             console.error('Chessboard element not found');
@@ -45,17 +82,7 @@ $(document).ready(function() {
 
             board.children[position].appendChild(pieceElement);
         }
-        function makeDraggable(element) {
-            element.addEventListener('dragstart', (e) => {
-                draggedElement = e.target;
-                e.target.style.opacity = '0.1';
-                e.dataTransfer.setDragImage(e.target, 75 / 2, 75 / 2);
-            });
 
-            element.addEventListener('dragend', (e) => {
-                e.target.style.opacity = '';
-            });
-}
 
         const pieces = ['pawn_white', 'pawn_black', 'rook_white', 'knight_white', 'bishop_white', 'queen_white', 'king_white', 'bishop_white', 'knight_white', 'rook_white', 'rook_black', 'knight_black', 'bishop_black', 'queen_black', 'king_black', 'bishop_black', 'knight_black', 'rook_black'];
 
@@ -119,11 +146,16 @@ $(document).ready(function() {
         });
         document.querySelectorAll('.promotion-choice').forEach(button => {
           button.addEventListener('click', function() {
-            const chosenPiece = this.getAttribute('data-piece');
+              promotion = this.getAttribute('data-piece');
+              console.log(promotion + " первый шаг");
 
 
             // Скрываем модальное окно после выбора
             document.getElementById('promotionModal').style.display = 'none';
+            // Если promotion установлено, отправляем запрос с данными из временных переменных
+                if (promotion) {
+                    sendMoveRequest(tempFromCoord, tempToCoord, promotion,draggedElement_2);
+                }
           });
         });
 
@@ -140,20 +172,30 @@ $(document).ready(function() {
 
             square.addEventListener('drop', (e) => {
                 e.preventDefault();
-                const targetSquare = e.target.closest('.black, .white'); // Находим клетку
+                targetSquare = e.target.closest('.black, .white'); // Находим клетку
 
                 if (draggedElement && targetSquare && !end_of_game) {
                     // Определяем координаты from и to
                     const fromCoord = draggedElement.parentElement.getAttribute('data-coord');
                     let toCoord = targetSquare.getAttribute('data-coord');
                     const id = draggedElement.id;
+                    tempFromCoord = fromCoord;
+                    tempToCoord = toCoord;
+                    draggedElement_2 = draggedElement;
                     // Проверяем, достигла ли пешка последней горизонтали
                       if (isPawnPromotion(fromCoord, toCoord, id)) {
                         // Показываем модальное окно для выбора фигуры
-                        showPromotionModal();
+                        document.getElementById('promotionModal').style.display = 'block';
+
+                        console.log(promotion +  " sdfsdf sfsdfsdf sdfs")
+                        toCoord +=promotion
+                      console.log(toCoord + " ikofhbhdgfhsjl")
+                          promotion = None;
+
                       }
-                        if(isPawnPromotion(fromCoord,toCoord,id))
-                        {toCoord +=promotion;}
+
+
+
                     // Здесь AJAX запрос на сервер
                     fetch('http://127.0.0.1:8000/make_move', {
                         method: 'POST',
@@ -161,7 +203,7 @@ $(document).ready(function() {
                             'Content-Type': 'application/json',
                             'X-CSRFToken': getCookie('csrftoken') // Получаем CSRF токен
                         },
-                            body: JSON.stringify({from: fromCoord, to: toCoord,promotion: promotion })
+                            body: JSON.stringify({from: fromCoord, to: toCoord,promo: promotion })
 
                     })
                         .then(response => response.json())
@@ -266,21 +308,7 @@ $(document).ready(function() {
             });
         });
 
-        // Функция для получения значения CSRF токена
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
-                }
-            }
-            return cookieValue;
-        }
+
     }
         let moveNumber = 1; // Начальный номер хода
         let isWhiteTurn = true; // Флаг очереди хода белых
@@ -399,6 +427,151 @@ $(document).ready(function() {
 
           return false;
         }
+    function sendMoveRequest(fromCoord, toCoord, promotion, draggedElement_2) {
+    // Здесь AJAX запрос на сервер
+    toCoord += promotion;
+    fetch('http://127.0.0.1:8000/make_move', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken') // Получаем CSRF токен
+        },
+        body: JSON.stringify({from: fromCoord, to: toCoord, promo: promotion })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (!data.move_made) {
+            // Обработка случая, когда ход не выполнен
+        } else {
+            console.log(data.chekmate);
+
+            // Если ход возможен, перемещаем фигуру
+            while (targetSquare.firstChild) {
+                targetSquare.removeChild(targetSquare.firstChild); // Съединение фигуры
+            }
+            targetSquare.appendChild(draggedElement_2);
+            while (targetSquare.firstChild) {
+                targetSquare.removeChild(targetSquare.firstChild); // Съединение фигуры
+            }
+            const moveString_2 = fromCoord + toCoord; // Например, 'e2e4'
+            addMoveToStory(moveString_2);
+            let num = getBoardIndex(toCoord[0], toCoord[1]);
+            switch (toCoord[2]) {
+                case 'r':
+                    if (num > 10) {
+                        addPiece("rook_black", num);
+                    } else {
+                        addPiece("rook_white", num);
+                    }
+                    break;
+                case 'b':
+                    if (num > 10) {
+                        addPiece("bishop_black", num);
+                    } else {
+                        addPiece("bishop_white", num);
+                    }
+                    break;
+                case 'q':
+                    if (num > 10) {
+                        addPiece("queen_black", num);
+                    } else {
+                        addPiece("queen_white", num);
+                    }
+                    break;
+                case 'k':
+                    if (num > 10) {
+                        addPiece("knight_black", num);
+                    } else {
+                        addPiece("knight_white", num);
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    })
+    .finally(() => {
+        draggedElement_2.style.opacity = ''; // Возвращаем нормальную прозрачность
+        draggedElement_2 = null; // Сбрасываем ссылку на перетаскиваемый элемент
+    });
+}
+
+// Функция для получения значения CSRF токена
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        function getSquareIndex(file) {
+                switch (file) {
+                    case 'a':
+                        return 0;
+                    case 'b':
+                        return 1;
+                    case 'c':
+                        return 2;
+                    case 'd':
+                        return 3;
+                    case 'e':
+                        return 4;
+                    case 'f':
+                        return 5;
+                    case 'g':
+                        return 6;
+                    case 'h':
+                        return 7;
+                    default:
+                        return -1; // Если введена неверная буква
+                }
+            }
+
+            function getBoardIndex(file, rank) {
+                const fileIndex = getSquareIndex(file);
+                const rankIndex = 8 - parseInt(rank); // Переворачиваем ранг, так как шахматная доска инвертирована
+                if (fileIndex >= 0 && fileIndex <= 7 && rankIndex >= 0 && rankIndex <= 7) {
+                    return rankIndex * 8 + fileIndex;
+                } else {
+                    return -1; // Если введены неверные координаты
+                }
+            }
+
+        function addPiece(piece, position) {
+            const  pieceElement_2 = document.createElement('img');
+            pieceElement_2.src = '/static/figures/' + piece + '.png';
+            pieceElement_2.className = 'chesspiece';
+            pieceElement_2.draggable = true;
+
+            // Вычисляем координаты
+            const x = 'abcdefgh'[position % 8];
+            const y = 8 - Math.floor(position / 8);
+            const coord = `${x}${y}`;
+
+            // Устанавливаем id фигуры на основе её позиции
+            const pieceId = `${piece}-${coord}`;
+            pieceElement_2.id = pieceId;
+
+            // Устанавливаем атрибут data-coord для фигуры
+            pieceElement_2.setAttribute('data-coord', coord);
+            makeDraggable(pieceElement_2);
+
+
+
+            board.children[position].appendChild(pieceElement_2);
+        }
+
+
 
 
 
