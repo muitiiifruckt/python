@@ -96,11 +96,11 @@ def moreThanOneMin(L):
 
 
 def findPivotIndex(tableau):
-   # выбираем минимальный положительный индекс последней строки
+   # выбираем минимальный положительный индекс
    column_choices = [(i,x) for (i,x) in enumerate(tableau[-1][:-1]) if x > 0]
    column = min(column_choices, key=lambda a: a[1])[0]
 
-   # проверяем на ограничение
+
    if all(row[column] <= 0 for row in tableau):
       raise Exception('Линейная программа не ограничена.')
 
@@ -108,10 +108,6 @@ def findPivotIndex(tableau):
    quotients = [(i, r[-1] / r[column])
       for i,r in enumerate(tableau[:-1]) if r[column] > 0]
 
-   if moreThanOneMin(quotients):
-      raise Exception('Линейная программа вырождена.')
-   if len(quotients) ==0:
-      raise  Exception("Не имеет решения")
 
    # выбираем индекс строки, минимизирующий квотиент
    row = min(quotients, key=lambda x: x[1])[0]
@@ -130,17 +126,6 @@ def pivotAbout(tableau, pivot):
          pivotRowMultiple = [y * tableau[k][j] for y in tableau[i]]
          tableau[k] = [x - y for x,y in zip(tableau[k], pivotRowMultiple)]
 
-
-'''
-   simplex: [float], [[float]], [float] -> [float], float
-   Решает данную линейную программу в стандартной форме:
-
-      max <c,x>
-      при условии Ax = b
-           x >= 0
-
-   предоставляя оптимальное решение x* и значение целевой функции
-'''
 def simplex(c, A, b):
 
    tableau = initialTableau(c, A, b)
@@ -173,7 +158,7 @@ if __name__ == "__main__":
 
    c = [3,4,5,6]
    A = [[5,6,4,1], [5,4,6,8],[1,2,1,3]]
-   b = [400,500,100]
+   b = [400,500,100] # положиельные
 
    min_1 = False
    first_c = c.copy()
