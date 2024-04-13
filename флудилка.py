@@ -36,7 +36,7 @@ def create_nedostayochiy_basis(A):
         for j in range(razmer_of_basis):
             basis.append(1 if i==j else 0)
         if not(basis in A_columns_s):
-            nedostayochiy_basis += basis
+            nedostayochiy_basis.append( basis)
             index_of_basis.append(i)
 
     return nedostayochiy_basis
@@ -48,7 +48,7 @@ def zapolneniye_A_nedostayochimi_basisami(A,c, nedostayochiy_basis):
             for j in range(len(nedostayochiy_basis[0])):
                 A[i].append(nedostayochiy_basis[i][j])
             c.append(W)
-        return
+        return A,c
     else: #  если базис не надо добавлять то все ок
         return A,c
 def proverka_right_na_poloshitelnost(b,A,znaki):
@@ -135,15 +135,13 @@ def count_delta_and_index_out_and_in(table,c): # возвращается инд
             pp =table[j][1]
             ppp = table[j][i+2]
 
-            skal_sum +=table[j][1]*table[j][i+2]
+            skal_sum +=round(table[j][1]*table[j][i+2],2)
         if i>0:
             delta_list[i] = skal_sum -c[i-1]
         else:
             delta_list[i] = skal_sum
 
     max_delta = max(delta_list[1:])
-    if(max_delta<=0):
-        return -999999 # пересчетов больше не будет
     index_of_poloz_delta = delta_list.index(max_delta)
     # мы получили максимальную дельту теперь найдем индекс вeктора, который уйдет из базиса
     # ищем минимальное отношение
@@ -156,8 +154,11 @@ def count_delta_and_index_out_and_in(table,c): # возвращается инд
             if min > (table[i][2] /table[i][index_of_poloz_delta+2]):
                 min = (table[i][2] /table[i][index_of_poloz_delta+2]) # отношение деления
                 index_of_last_basis = table[i][0]  # индекс ветора который должен уйти
-    if min:
+    if min !=999999:
         return index_of_poloz_delta , index_of_last_basis
+    else:
+        Exception("Не имеет решения")
+
 def simplex(c,A,b,znaki,dlina_basisa):
     c = min_max(minimization,c) # 1 step
     b, A,znaki = proverka_right_na_poloshitelnost(b,A,znaki) # 2 step
@@ -167,16 +168,28 @@ def simplex(c,A,b,znaki,dlina_basisa):
 
 
     table = create_first_table(A,c,b)
-    index_of_last_basis = 0
+    index_of_poloz_delta= 0
     index_of_last_basis = 0
 
     while count_delta(table,c) :
-        table = perechet(table, *count_delta_and_index_out_and_in(table,c))
+        for i in range(len(table)):
+            print(table[i])
+        index_of_poloz_delta, index_of_last_basis = count_delta_and_index_out_and_in(table,c)
+        table = perechet(table,index_of_poloz_delta , index_of_last_basis)
     list_of_x = [0]*dlina_basisa
-    for i in range(len(A)):
-        list_of_x[table[i][0]-1] =  table[i][2]
-    print(table)
-    print(list_of_x)
+    for i in range(len(znaki)):
+        if  i< len(table) and table[i][0]-1 < len(list_of_x):
+            list_of_x[table[i][0]-1] =  table[i][2]
+    print("Table")
+    for i in range(len(table)):
+        print(table[i])
+    print()
+    f_x = 0
+    for i in range(len(znaki)):
+        f_x +=table[i][1]*table[i][2]
+    print("x ",list_of_x)
+    print()
+    print("f(x)=" , round(f_x,2))
 def perechet(table,index_of_poloz_delta , index_of_last_basis):
     for i in range(len(table)):
         for j in range(len(table)):
@@ -189,7 +202,7 @@ def perechet(table,index_of_poloz_delta , index_of_last_basis):
     for i in range(len(table[index_of_1_2_3][2:])): # разделили нову строку на кэф чтобы базис был с 1
         p = table[index_of_1_2_3][2:][i]
         pp = table[index_of_1_2_3][2:][i]*kef
-        table[index_of_1_2_3][i+2] = table[index_of_1_2_3][2:][i]*kef
+        table[index_of_1_2_3][i+2] = round(table[index_of_1_2_3][2:][i]*kef,2)
     table[index_of_1_2_3][0] = index_of_poloz_delta
     table[index_of_1_2_3][1] = c[index_of_poloz_delta-1]
     rows = range(len(table))
@@ -197,25 +210,31 @@ def perechet(table,index_of_poloz_delta , index_of_last_basis):
         if i!=index_of_1_2_3:
             kef = (-1)*table[i][index_of_poloz_delta+2]
             for j in range(len(table[i][2:])):
-                table[i][j+2] = table[i][2:][j] + kef*table[index_of_1_2_3][2:][j]
+                table[i][j+2] = round(table[i][2:][j] + kef*table[index_of_1_2_3][2:][j],2)
     return table
 
-
+delta_list = list()
 # нужно разораться со знаками, типо сначала урегулировать вопрос со знаками (случай зависит отзнака)
 # затем перейти уже к реализации симплекса самого
 
 
-minimization = True
-c = [2,-1,3,-10,1]
-A = [ [0,1,0,2,0],
-      [1,0,2,-1,0],
-      [0,0,-1,-2,1]
+minimization = False
+c = [0,3,1,-1,1]
+A = [ [-1,2,1,0,0],
+      [1,1,0,4,0],
+      [2,1,1,1,2]
 
 ]
 dlina_basisa = len(A[0])
-b = [4,4,6]
-znaki = [0,0,0] #  -1 is <=   0 is  =   1 is  >=
-simplex(c,A,b,znaki,dlina_basisa)
+b = [2,-2,6]
+znaki = [0,-1,0] #  -1 is <=   0 is  =   1 is  >=
+try:
+    simplex(c,A,b,znaki,dlina_basisa)
+except Exception:
+    print("Не имееет решения")
+
+
+
 
 
 
