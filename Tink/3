@@ -1,0 +1,29 @@
+input
+6
+root/a
+root/a/b
+root/c/x
+root/a/b/c
+root
+root/c
+
+output
+root
+ a
+  b
+   c
+ c
+  x
+
+input
+4
+a/b/c/d
+a/b
+a/b/c
+a
+
+output
+a
+ b
+  c
+   d

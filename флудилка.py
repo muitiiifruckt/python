@@ -1,20 +1,4 @@
-
-def find_basis_in_first_table(A): # не нужно
-    # na vhod matrix A - ogranicheniya
-    # this func return the all basis , if he has
-    baz_imeyuchisa = list() # this list for basis, if he had
-    for i in A:
-        count_0 = 0
-        count_1 = 0
-        for j in i:
-            if (j==1):
-                count_1 +=1
-            elif (j==0):
-                count_0
-        if( count_1 == 1 and (count_0 + 1 == len(i)) ):
-            # is basis and
-            baz_imeyuchisa.append(i)
-    return baz_imeyuchisa
+import copy
 def create_nedostayochiy_basis(A):
     # na vhod matrix b of founded_basis_in_first_table
     # return nedostayochiy basis
@@ -32,7 +16,6 @@ def create_nedostayochiy_basis(A):
 
     for i in range(razmer_of_basis): # проверяем каких базисов нет в массиве столбцов и тех что нет добавляем в nedostayochiy_basis
         basis = list()
-
         for j in range(razmer_of_basis):
             basis.append(1 if i==j else 0)
         if not(basis in A_columns_s):
@@ -44,26 +27,26 @@ def zapolneniye_A_nedostayochimi_basisami(A,c, nedostayochiy_basis):
     # на вход матрица А  на выходе матрица А со всеми базисами
     W = 99999  # бесконечно большое число
     if nedostayochiy_basis: #  само добавление недостающего базиса
-        for i in range(len(nedostayochiy_basis)):
-            for j in range(len(nedostayochiy_basis[0])):
-                A[i].append(nedostayochiy_basis[i][j])
+        for j in range(len(nedostayochiy_basis[0])):
+            for i in range(len(nedostayochiy_basis)):
+                A[j].append(nedostayochiy_basis[i][j])
             c.append(W)
         return A,c
     else: #  если базис не надо добавлять то все ок
         return A,c
-def proverka_right_na_poloshitelnost(b,A,znaki):
+def proverka_right_na_poloshitelnost(b ,A ,znaki):
     # домножение на -1 если справа отрицательное число
     for i in range(len(b)):
         if b[i]<0:
             b[i] = b[i]*(-1) # умножаем правою сторону на -1
             znaki[i] = znaki[i]*(-1) # меняем знак уравнения
-            for j in range(len(A[i])):# меняем знаки левой части уравнения
+            for j in range(len(A[i])):  # меняем  знаки левой части уравнения
                A[j] = A[j]*(-1)
     return b,A,znaki
 def min_max(minimization,c):
     if not minimization:
-        for i in c:
-            i = i*(-1)
+        for i in range(len(c)):
+            c[i] = c[i]*(-1)
     return  c
 def prividenie_k_ravenstvam(A,c,znaki):
     for i in range(len(znaki)):
@@ -153,12 +136,14 @@ def count_delta_and_index_out_and_in(table,c): # возвращается инд
             pp =table[i][2]
             if min > (table[i][2] /table[i][index_of_poloz_delta+2]):
                 min = (table[i][2] /table[i][index_of_poloz_delta+2]) # отношение деления
-                index_of_last_basis = table[i][0]  # индекс ветора который должен уйти
+                index_of_last_basis = table[i][0]  # индекс вектора который должен уйти
     if min !=999999:
         return index_of_poloz_delta , index_of_last_basis
     else:
         Exception("Не имеет решения")
-
+# ч и т а й  м е ж  с т р о к
+# н е т  ц е л и
+# е с т ь  т о л ь к о  к о д
 def simplex(c,A,b,znaki,dlina_basisa):
     c = min_max(minimization,c) # 1 step
     b, A,znaki = proverka_right_na_poloshitelnost(b,A,znaki) # 2 step
@@ -176,6 +161,8 @@ def simplex(c,A,b,znaki,dlina_basisa):
             print(table[i])
         index_of_poloz_delta, index_of_last_basis = count_delta_and_index_out_and_in(table,c)
         table = perechet(table,index_of_poloz_delta , index_of_last_basis)
+        if index_of_poloz_delta == index_of_last_basis:
+            break
     list_of_x = [0]*dlina_basisa
     for i in range(len(znaki)):
         if  i< len(table) and table[i][0]-1 < len(list_of_x):
@@ -184,12 +171,89 @@ def simplex(c,A,b,znaki,dlina_basisa):
     for i in range(len(table)):
         print(table[i])
     print()
+    for i in range(len(table)): # если в базисе останется
+        if table[i][1] == 99999:
+            print("Не имеет решния, искусственый базис не ушел из решения")
+            return
     f_x = 0
     for i in range(len(znaki)):
         f_x +=table[i][1]*table[i][2]
     print("x ",list_of_x)
     print()
-    print("f(x)=" , round(f_x,2))
+    print("f(x)=" , round(f_x,2) * 1 if minimization else round(f_x,2)*(-1))
+    return list_of_x
+def analize_chuyvstvitelnost(cc,A,znaki,b,x,dlina_basisa):
+    n = 5 # 2 в степени n шаг
+    num_to_inf =2
+    inf = 99999999999
+    step = pow(2,n)
+    c_up_actual = copy.deepcopy(cc)
+    c_down_actual = copy.deepcopy(cc)
+    for i in range(len(cc)):
+        list_up = list()
+        list_down = list()
+        # up
+        step = pow(2, n)
+        for j in range(n+1): # схоже на бинарный поиск ну типо иду с шагом 32 например пока все потом шагом 16 и так далее пока шаг не олин и ине найду грань
+            A_copy = copy.deepcopy(A)
+            b_copy = copy.deepcopy(b)
+            znaki_copy = copy.deepcopy(znaki)
+            count_to_infinity =0
+            while True:
+                c_up_actual[i] += step
+                x_experimental = [0] * len(cc)
+                for k in range(len(cc)):
+                    x_experimental[k] = c_up_actual[i] if i == k else cc[k]
+                x_current = simplex(x_experimental, A_copy, b_copy, znaki_copy, dlina_basisa)
+                if not is_equal_x_lists(x,x_current):
+                    break
+                elif count_to_infinity ==num_to_inf:
+                    c_down_actual[i] =  inf
+                    break
+                A_copy = copy.deepcopy(A)
+                b_copy = copy.deepcopy(b)
+                znaki_copy = copy.deepcopy(znaki)
+                count_to_infinity += 1
+            c_up_actual[i] -=step
+            step /=2
+            if count_to_infinity == num_to_inf:
+                break
+        step = pow(2, n)
+        for j in range(n + 1):  # схоже на бинарный поиск ну типо иду с шагом 32 например пока все потом шагом 16 и так далее пока шаг не олин и ине найду грань
+            A_copy = copy.deepcopy(A)
+            b_copy = copy.deepcopy(b)
+            znaki_copy = copy.deepcopy(znaki)
+            count_to_infinity = 0
+            while True:
+                c_down_actual[i] -= step
+                x_experimental = [0]*len(cc)
+                for k in range( len(cc)):
+                    x_experimental[k] = c_down_actual[i] if i==k else cc[k]
+                x_current = simplex(x_experimental, A_copy, b_copy, znaki_copy, dlina_basisa)
+                if not is_equal_x_lists(x, x_current) :
+                    break
+                elif count_to_infinity ==num_to_inf:
+                    c_down_actual[i] =  inf*(-1)
+                    break
+                c_down_actual[i] -= step
+                A_copy = copy.deepcopy(A)
+                b_copy = copy.deepcopy(b)
+                znaki_copy = copy.deepcopy(znaki)
+                count_to_infinity +=1
+            c_down_actual[i] += step
+            step /= 2
+            if count_to_infinity == num_to_inf:
+                break
+    return c_down_actual,c_up_actual
+
+
+def is_equal_x_lists(x,current_x):
+    if not current_x:
+        return False
+    for i in range(len(x)):
+        if(round(x[i]) != round(current_x[i])):
+            return False
+    return True
 def perechet(table,index_of_poloz_delta , index_of_last_basis):
     for i in range(len(table)):
         for j in range(len(table)):
@@ -214,24 +278,34 @@ def perechet(table,index_of_poloz_delta , index_of_last_basis):
     return table
 
 delta_list = list()
-# нужно разораться со знаками, типо сначала урегулировать вопрос со знаками (случай зависит отзнака)
-# затем перейти уже к реализации симплекса самого
 
 
+# Задаем входные параметры  для целевой, мин/макс , ограничения, правая сторона ограничений , знаки
 minimization = False
-c = [0,3,1,-1,1]
-A = [ [-1,2,1,0,0],
-      [1,1,0,4,0],
-      [2,1,1,1,2]
 
-]
+c = [3,4,5,6]           # Целевая функция
+A = [ [5,6,4,1],        # Ограничения
+      [5,4,6,9],
+      [1,2,1,3]
+      ]
+
+b = [400,500,100]              # Вектор Р0
+znaki = [-1,-1,-1]          # знаки   -1 is <=  // 0 is  =  // 1 is  >=
+cc = copy.deepcopy(c)
+AA = copy.deepcopy(A)
+bb = copy.deepcopy(b)
+znaki_znaki = copy.deepcopy(znaki)
+
 dlina_basisa = len(A[0])
-b = [2,-2,6]
-znaki = [0,-1,0] #  -1 is <=   0 is  =   1 is  >=
 try:
-    simplex(c,A,b,znaki,dlina_basisa)
+    x =simplex(c, A, b, znaki, dlina_basisa)
+    xx = copy.deepcopy(x)
+    down_c, up_c = analize_chuyvstvitelnost(cc,AA,znaki_znaki,bb,xx,dlina_basisa)
+    for i in range(len(up_c)):
+        print(down_c[i],"           ",up_c[i])
 except Exception:
     print("Не имееет решения")
+
 
 
 
