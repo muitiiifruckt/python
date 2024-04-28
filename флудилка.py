@@ -131,9 +131,7 @@ def count_delta_and_index_out_and_in(table,c): # возвращается инд
     min  = 999999
     index_of_last_basis = 999
     for i in range(len(table)):
-        p = table[i][index_of_poloz_delta+2]
         if table[i][index_of_poloz_delta+2]>0:
-            pp =table[i][2]
             if min > (table[i][2] /table[i][index_of_poloz_delta+2]):
                 min = (table[i][2] /table[i][index_of_poloz_delta+2]) # отношение деления
                 index_of_last_basis = table[i][0]  # индекс вектора который должен уйти
@@ -255,9 +253,7 @@ def is_equal_x_lists(x,current_x):
             return False
     return True
 def perechet(table,index_of_poloz_delta , index_of_last_basis):
-    for i in range(len(table)):
-        for j in range(len(table)):
-            float(table[i][j])
+
     index_of_1_2_3 = 0
     for i in range(len(table)):
         if table[i][0]==index_of_last_basis:
@@ -283,13 +279,13 @@ delta_list = list()
 # Задаем входные параметры  для целевой, мин/макс , ограничения, правая сторона ограничений , знаки
 minimization = False
 
-c = [3,4,5,6]           # Целевая функция
-A = [ [5,6,4,1],        # Ограничения
-      [5,4,6,9],
-      [1,2,1,3]
+c = [3,10,10,18]           # Целевая функция
+A = [ [2,1,4,10],        # Ограничения
+      [2,1,4,2],
+      [10,10,20,50]
       ]
 
-b = [400,500,100]              # Вектор Р0
+b = [10000,10000,0]              # Вектор Р0
 znaki = [-1,-1,-1]          # знаки   -1 is <=  // 0 is  =  // 1 is  >=
 cc = copy.deepcopy(c)
 AA = copy.deepcopy(A)

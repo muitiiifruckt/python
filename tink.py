@@ -1,2 +1,7 @@
-c = [1,2,3]
-c[1].append(2)
+import whois
+
+domain = "cpi.com"
+
+whois_info = whois.whois(domain)
+
+print(whois_info)

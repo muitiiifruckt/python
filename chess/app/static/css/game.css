@@ -289,4 +289,50 @@ body {
   margin: 5px;
   border-radius: 5px;
 }
+/* Стили для контейнера */
+.container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; /* Выравнивание содержимого контейнера к верхней части */
+  height: 100vh; /* Высота контейнера на весь экран */
+  margin: 0;
+}
+
+/* Стили для кнопок */
+.buttons {
+  display: flex;
+  align-items: center;
+  flex-direction: column; /* Устанавливаем направление расположения элементов в столбец */
+  position: absolute;
+  top: 60px; /* Отступ от верхней границы контейнера */
+  left: 5%;
+}
+
+.button {
+  margin: 10px;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  width: 400px; /* Устанавливаем одинаковую ширину для всех кнопок */
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  transition: background-color 0.3s, transform 0.3s;
+}
+
+.button:hover {
+  background-color: #45a049;
+  transform: scale(0.95);
+}
+
+/* Дополнительные стили для кнопок "Зарегистрироваться" и "Войти" */
+.button.register {
+  background-color: #2196F3;
+}
+
+.button.login {
+  background-color: #f44336;
+}
 

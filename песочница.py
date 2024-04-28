@@ -1,200 +1,222 @@
-import heapq
+
+import numpy as np
+
+
+def get_mark(matrix, function, basis):
+    c_basis = []
+    for i in basis:
+        c_basis.append(function[i - 1])
+    mark = np.dot(c_basis, matrix) - (np.append([0], function))
+    return mark
+
+
+def countinue(mark_in):
+    return any(mark_in[1:] > 0)
+
+
+def get_basis(matrix):
+    basis = []
+    for i in range(len(matrix)):
+        basis.append(matrix.shape[1] - len(matrix) + i)
+    return basis
+
+
+def add_variables(matrix, function):
+    num_new_variables = matrix.shape[0]
+
+    identity_matrix = np.eye(num_new_variables)
+    augmented_matrix = np.concatenate((matrix, identity_matrix), axis=1)
+
+    num_existing_variables = len(function)
+    new_function = np.append(function, np.zeros(num_new_variables))
+
+    return augmented_matrix, new_function
+
+
+def recount(matrix_in, index_input, index_output):
+    matrix = np.copy(matrix_in)
+
+    pivot_element = matrix[index_output, index_input]
+    matrix[index_output] /= pivot_element
+
+    num_rows = matrix.shape[0]
+    for i in range(num_rows):
+        if i != index_output:
+            multiplier = matrix[i, index_input]
+            matrix[i] -= multiplier * matrix[index_output]
+
+    return matrix
+
+
+def index_input(mark):
+    return np.argmax(mark)
+
+
+def index_output(index_input, matrix_in):
+    matrix = np.copy(matrix_in)
+    p_i = matrix[:, index_input].copy()
+    p_i[p_i == 0] = -1
+
+    p_0 = matrix[:, 0]
+    teta = p_0 / p_i
+
+    teta[teta <= 0] = np.inf
+    index_output = np.argmin(teta)
+
+    if teta[index_output] == np.inf:
+        raise Exception("Нет решений")
+    else:
+        return index_output
+
+
+def solve(matrix, function, basis):
+    mark = get_mark(matrix, function, basis)
+    flag = countinue(mark)
+
+    while flag:
+        indexInput = index_input(mark)
+        indexOutput = index_output(indexInput, matrix)
+        matrix = recount(matrix, indexInput, indexOutput)
+        basis[indexOutput] = indexInput
+        mark = get_mark(matrix, function, basis)
+        flag = countinue(mark)
+
+    return matrix, function, basis
+
+
+def to_canon(a, b, c, constraints):
+    matrix = np.copy(a)
+    vector = np.copy(b)
+    function = np.copy(c)
+
+    matrix = np.concatenate((vector.T, matrix), axis=1)
+    matrix, function = add_variables(matrix, function)
+    basis = get_basis(matrix)
+
+    for i, constraint in enumerate(constraints):
+        if constraint == '=':
+            pass
+        elif constraint == '<':
+            matrix[i, -1] = 1
+        elif constraint == '>':
+            matrix[i, -1] = -1
+            function *= -1
+
+    return matrix, function, basis
+
+
+def simplex(matrix, function, basis):
+    matrix, function, basis = solve(matrix, function, basis)
+    mark = get_mark(matrix, function, basis)
+
+    p_0 = matrix[:, 0]
+    x = np.zeros(len(function))
+
+    original_variable_indices = [b - 1 for b in basis if (b - 1) < len(function)]
+
+    for i, idx in enumerate(original_variable_indices):
+        x[idx] = p_0[i]
+
+    x_values = [f"x[{i + 1}] = {x[i]:.0f}" for i in range(len(function))]
+
+    print(", ".join(x_values))
+
+    print(f"f(x) = {mark[0] * -1:.0f}")
+
+
+def read_data(filename):
+    with open(filename, 'r') as file:
+        lines = file.readlines()
+        constraints = [line.split()[-1] for line in lines[:-2]]
+        a = np.array([list(map(float, line.split()[:-1])) for line in lines[:-2]])
+        b = np.array([list(map(float, lines[-2].split()))])
+        c = np.array(list(map(float, lines[-1].split()))) * -1
+    return a, b, c, constraints
+
+
+def print_simplex_table(matrix, basis):
+    num_constraints, num_variables = matrix.shape
+
+    print("Basis\tP0\t", end="")
+    for j in range(1, num_variables):
+        print(f"P{j}\t", end="")
+    print()
+
+    for i in range(num_constraints):
+        basis_idx = basis[i] - 1
+        constraint_b = matrix[i, 0]
+
+        p_values = matrix[i, 1:num_variables]
+
+        basis_var = f"x[{basis_idx + 1}]"
+        constraint_b_str = f"{constraint_b:.2f}"
+        p_values_str = "\t".join(f"{p:.2f}" for p in p_values)
+
+        print(f"{basis_var}\t{constraint_b_str}\t{p_values_str}")
 
 
 
-def identity(numRows, numCols, val=1, rowStart=0):
-   return [[(val if i == j else 0) for j in range(numCols)]
-               for i in range(rowStart, numRows)]
+
+def extract_simplex_table_matrix(matrix, basis):
+    num_constraints = len(basis)
+    num_variables = matrix.shape[1] - 1
+
+    simplex_table_matrix = np.zeros((num_constraints, num_variables + 1), dtype=float)
+
+    for i in range(num_constraints):
+        basis_idx = basis[i] - 1
+        simplex_table_matrix[i, 0] = float(matrix[i, 0])
+        simplex_table_matrix[i, 1:] = matrix[i, 1:num_variables + 1].astype(float)
+
+    return simplex_table_matrix
 
 
+def extract_added_variables_matrix(matrix, basis, original_variable_count):
+    num_constraints = len(basis)
+    num_variables = matrix.shape[1] - 1
 
-def standardForm(cost, greaterThans=[], gtThreshold=[], lessThans=[], ltThreshold=[],
-                equalities=[], eqThreshold=[], maximization=True):
-   newVars = 0
-   numRows = 0
-   if gtThreshold != []:
-      newVars += len(gtThreshold)
-      numRows += len(gtThreshold)
-   if ltThreshold != []:
-      newVars += len(ltThreshold)
-      numRows += len(ltThreshold)
-   if eqThreshold != []:
-      numRows += len(eqThreshold)
+    added_variables_indices = [i for i in range(original_variable_count, num_variables)]
 
-   if not maximization:
-      cost = [-x for x in cost]
+    added_variables_matrix = np.zeros((num_constraints, len(added_variables_indices)), dtype=float)
 
-   if newVars == 0:
-      return cost, equalities, eqThreshold
+    for i in range(num_constraints):
+        for j, idx in enumerate(added_variables_indices):
+            added_variables_matrix[i, j] = matrix[i, idx + 1]
 
-   newCost = list(cost) + [0] * newVars
-
-   constraints = []
-   threshold = []
-
-   oldConstraints = [(greaterThans, gtThreshold, -1), (lessThans, ltThreshold, 1),
-                     (equalities, eqThreshold, 0)]
-
-   offset = 0
-   for constraintList, oldThreshold, coefficient in oldConstraints:
-      constraints += [c + r for c, r in zip(constraintList,
-         identity(numRows, newVars, coefficient, offset))]
-
-      threshold += oldThreshold
-      offset += len(oldThreshold)
-
-   return newCost, constraints, threshold
+    return added_variables_matrix
 
 
-def dot(a,b):
-   return sum(x*y for x,y in zip(a,b))
+def matrix_with_new_p0(final_matrix_added_variables, final_matrix, vector_range):
+    for v in vector_range:
+        new_p0 = np.dot(final_matrix_added_variables, v)
+        final_matrix[:, 0] = new_p0
 
-def column(A, j):
-   return [row[j] for row in A]
-
-def transpose(A):
-   return [column(A, j) for j in range(len(A[0]))]
-
-def isPivotCol(col):
-   return (len([c for c in col if c == 0]) == len(col) - 1) and sum(col) == 1
-
-def variableValueForPivotColumn(tableau, column):
-   pivotRow = [i for (i, x) in enumerate(column) if x == 1][0]
-   return tableau[pivotRow][-1]
+    return final_matrix
 
 
-def initialTableau(c, A, b):
-   tableau = [row[:] + [x] for row, x in zip(A, b)]
-   tableau.append([ci for ci in c] + [0])
-   return tableau
+if __name__== "main":
+    np.set_printoptions(suppress=True)
+    filename = "C:\\Users\\aayza\\PycharmProjects\\Учебные проекты на пайтон\\data.txt"
+    a, b, c, constraints = read_data(filename)
+    matrix, function, basis = to_canon(a, b, c, constraints)
 
+    matrix, function, basis = solve(matrix, function, basis)
+    simplex(matrix, function, basis)
 
-def primalSolution(tableau):
-   # столбцы с опорными элементами определяют, какие переменные используются
-   columns = transpose(tableau)
-   indices = [j for j, col in enumerate(columns[:-1]) if isPivotCol(col)]
-   return [(colIndex, variableValueForPivotColumn(tableau, columns[colIndex]))
-            for colIndex in indices]
+    final_matrix = extract_simplex_table_matrix(matrix, basis)
 
+    print_simplex_table(matrix, basis)
 
-def objectiveValue(tableau):
-   return -(tableau[-1][-1])
+    print()
+    print("-----------Анализ на чувствительность-----------")
+    print()
 
+    original_variable_count = len(c)
+    final_matrix_added_variables = extract_added_variables_matrix(matrix, basis, original_variable_count)
 
-def canImprove(tableau):
-   lastRow = tableau[-1]
-   return any(x > 0 for x in lastRow[:-1])
+    vector_range = [
+        np.array([500, 500, 10])
+    ]
 
-
-
-def moreThanOneMin(L):
-   if len(L) <= 1:
-      return False
-
-   x,y = heapq.nsmallest(2, L, key=lambda x: x[1])
-   return x == y
-
-
-def findPivotIndex(tableau):
-   # выбираем минимальный положительный индекс
-   column_choices = [(i,x) for (i,x) in enumerate(tableau[-1][:-1]) if x > 0]
-   column = min(column_choices, key=lambda a: a[1])[0]
-
-
-   if all(row[column] <= 0 for row in tableau):
-      raise Exception('Линейная программа не ограничена.')
-
-   # проверяем на вырожденность: более одного минимизатора квотиента
-   quotients = [(i, r[-1] / r[column])
-      for i,r in enumerate(tableau[:-1]) if r[column] > 0]
-
-
-   # выбираем индекс строки, минимизирующий квотиент
-   row = min(quotients, key=lambda x: x[1])[0]
-
-   return row, column
-
-
-def pivotAbout(tableau, pivot):
-   i,j = pivot
-
-   pivotDenom = tableau[i][j]
-   tableau[i] = [x / pivotDenom for x in tableau[i]]
-
-   for k,row in enumerate(tableau):
-      if k != i:
-         pivotRowMultiple = [y * tableau[k][j] for y in tableau[i]]
-         tableau[k] = [x - y for x,y in zip(tableau[k], pivotRowMultiple)]
-
-def simplex(c, A, b):
-
-   tableau = initialTableau(c, A, b)
-   print("Начальная таблица:")
-   for row in tableau:
-      row = (row[-1], *row[:-1])
-      print(row)
-   print()
-
-   while canImprove(tableau):
-      pivot = findPivotIndex(tableau)
-      print("Следуюий индекс таблицы=%d,%d \n" % pivot)
-      pivotAbout(tableau, pivot)
-      index_of_basis[pivot[0]] = pivot[1] + 1
-      print(index_of_basis)
-      print("Таблица:")
-      for row in tableau:
-         row = (row[-1], *row[:-1])
-         print(row)
-      print()
-
-   return tableau, primalSolution(tableau), objectiveValue(tableau)
-
-
-if __name__ == "__main__":
-   # Задаём значения целевой функ   ции, вектораограничений
-   #    и
-   #    правой
-   #    стороны
-
-   c = [3,4,5,6]
-   A = [[5,6,4,1], [5,4,6,8],[1,2,1,3]]
-   b = [400,500,100] # положиельные
-
-   min_1 = False
-   first_c = c.copy()
-
-   len_of_x = len(A[0])  # Число значимых переменных
-
-   # Вводим базис
-   c_basis = list()
-   for i in range(len(A)):
-      basis = list()
-      c_basis.append(0)
-
-      for j in range(len(A)):
-         basis.append(1 if i == j else 0)
-      A[i] += basis
-   # Дополняем целевую функцию
-   c += c_basis
-   index_of_basis = list()
-   for i in range(len(b)):
-      index_of_basis.append(len(c) - i)
-   index_of_basis = index_of_basis[::-1]
-
-   # ЗАПУСК РЕШЕНИЯ
-   try:
-      t, s, v = simplex(c, A, b)
-      solution = list()  # Итоговое значения вектора значений
-      for i in range(len_of_x):  # подготовка ответов
-         if(i>=len(s)):
-            solution.append(0)
-         elif():
-            solution.append(s[i][1])
-
-      # Вывод оптимальных значений
-      print(s)
-      print(f"Значения вектора х : {solution}")
-      print(f"Оптимальное значение функции: {(v*(-1) if min_1 else v) }")
-      print(index_of_basis)
-   except Exception:
-      print("Нет решения")
+    last_matrix = matrix_with_new_p0(final_matrix_added_variables, final_matrix, vector_range)
+    print_simplex_table(last_matrix, basis)
