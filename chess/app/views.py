@@ -21,6 +21,7 @@ def make_move(request):
         return JsonResponse({'error': 'Invalid JSON'}, status=400)
 def index(request):
     return render(request, "html/index.html")
+
 def game(request):
     return render(request, "html/game.html")
 

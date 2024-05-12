@@ -11,15 +11,18 @@
   <body>
   <div class="game-info">
     <div class="story"></div>
-  </div>
+
+</div>
+
+
+
 {% if user.is_authenticated %}
     <div class="game-panel">
         <div class="container">
             <p>Вы вошли как: {{ user.username }}</p>
             <div class="buttons">
                 <!-- кнопки для зарегистрированных пользователей -->
-                <button class="button">Играть</button>
-                <button class="button">Мои игры</button>
+                <button id = "play-button" class="button">Играть</button>
                 <form action="{% url 'logout' %}" method="post">
                 {% csrf_token %}
             <button type="submit" class="button">Выйти</button>
@@ -27,6 +30,105 @@
 
             </div>
         </div>
+<!--        <title>Chat</title>-->
+<!--  <style>-->
+<!--    /* Стили для чата */-->
+<!--    .chat-container {-->
+<!--      width: 398px;-->
+<!--      height: 400px; /* Увеличена высота для примера */-->
+<!--      position: absolute;-->
+<!--      border: 1px solid #ccc;-->
+<!--      border-radius: 5px;-->
+<!--        left: 30px;-->
+<!--        bottom: 80px;-->
+
+
+
+<!--    }-->
+<!--    .message {-->
+<!--      background-color: #232020;-->
+<!--      border-radius: 5px;-->
+<!--      padding: 10px;-->
+<!--      margin-bottom: 10px;-->
+<!--    }-->
+<!--    .user-message {-->
+<!--      text-align: right;-->
+<!--    }-->
+
+<!--    /* Стили для формы */-->
+<!--    .chat-form {-->
+<!--      position: absolute; /* Позиционируем форму абсолютно внутри контейнера чата */-->
+<!--      bottom: 20px;-->
+<!--      left: 30px;-->
+<!--      width: 380px;-->
+<!--      display: flex;-->
+<!--      background-color: #fff; /* Добавляем фон для контраста */-->
+<!--      padding: 10px;-->
+<!--        border-radius: 10px;-->
+<!--    }-->
+<!--    .chat-form input[type="text"] {-->
+<!--      flex: 1;-->
+<!--      padding: 10px;-->
+<!--      border-radius: 5px 0 0 5px;-->
+<!--      border: 1px solid #ccc;-->
+<!--      outline: none;-->
+<!--    }-->
+<!--    .chat-form button {-->
+<!--      padding: 10px 20px;-->
+<!--      border: none;-->
+<!--      border-radius: 0 5px 5px 0;-->
+<!--      background-color: #007bff;-->
+<!--      color: #fff;-->
+<!--      cursor: pointer;-->
+<!--      outline: none;-->
+<!--    }-->
+<!--  </style>-->
+<!--</head>-->
+<!--<body>-->
+
+<!--  &lt;!&ndash; Чат будет отображаться здесь &ndash;&gt;-->
+<!--  <div class="chat-container" id="chat-container">-->
+<!--    &lt;!&ndash; Чат будет отображаться здесь &ndash;&gt;-->
+<!--  </div>-->
+
+<!--  &lt;!&ndash; Форма для отправки сообщений &ndash;&gt;-->
+<!--  <form class="chat-form" id="chat-form">-->
+<!--    <input type="text" id="message-input" placeholder="Введите сообщение...">-->
+<!--    <button type="submit">Отправить</button>-->
+<!--  </form>-->
+
+<!--  <script>-->
+<!--    const chatForm = document.getElementById('chat-form');-->
+<!--    // Инициализация чата с начальным сообщением от другого человека-->
+
+<!--    ;-->
+<!--    const messageInput = document.getElementById('message-input');-->
+<!--    const chatContainer = document.getElementById('chat-container');-->
+
+<!--    chatForm.addEventListener('submit', function(event) {-->
+<!--      event.preventDefault(); // Предотвращаем отправку формы по умолчанию-->
+
+<!--      const messageText = messageInput.value.trim(); // Получаем текст сообщения и удаляем лишние пробелы-->
+
+<!--      if (messageText !== '') {-->
+<!--          appendMessage("Привет, как дела?", 'щuser-message');-->
+<!--        appendMessage(messageText, 'user-message'); // Отображаем сообщение пользователя в чате-->
+<!--        messageInput.value = ''; // Очищаем поле ввода-->
+<!--          // Отображаем сообщение пользователя в чате-->
+
+<!--      }-->
+<!--    });-->
+
+<!--    function appendMessage(message, className) {-->
+<!--      const messageElement = document.createElement('div');-->
+<!--      messageElement.classList.add('message', className);-->
+<!--      messageElement.innerText = message;-->
+<!--      chatContainer.appendChild(messageElement);-->
+<!--      chatContainer.scrollTop = chatContainer.scrollHeight; // Прокручиваем контейнер вниз, чтобы показать последнее сообщение-->
+<!--    }-->
+<!--  </script>-->
+<!--</body>-->
+<!--</html>-->
     </div>
 {% else %}
     <div class="game-panel">
@@ -41,8 +143,10 @@
                 </a>
             </div>
         </div>
+
     </div>
 {% endif %}
+
 
 </div>
 
@@ -51,20 +155,20 @@
   <div class="user-info-top">
   <!--  <img src="" alt="User Image"> &lt;!&ndash; Путь к изображению пользователя &ndash;&gt;-->
     <div class="user-details">
-      <div class="user-name">Guest9540135630</div>
-      <div class="user-status">Online</div>
+      <div class="user-name">player_2</div>
+      <div class="user-status">online</div>
     </div>
-    <div class="user-time">9:56</div>
+    <div class="user-time">10:00</div>
   </div>
   <div id="chessboard" class="chessboard"></div>
 
   <div class="user-info-bottom">
   <!--  <img src="" alt="User Image"> &lt;!&ndash; Путь к изображению пользователя &ndash;&gt;-->
     <div class="user-details">
-      <div class="user-name">Guest9540135630</div>
-      <div class="user-status">Online</div>
+      <div class="user-name">player_1</div>
+      <div class="user-status">online</div>
     </div>
-    <div class="user-time">9:56</div>
+    <div class="user-time">9:45</div>
   </div>>
   <div id="checkmateModal" class="modal">
     <div class="modal-content">
@@ -94,6 +198,24 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/draggable/1.0.1/draggable.bundle.umd.min.js"></script>
 
   <script src="{% static 'js/game.js' %}"></script>
+    <script>
+  $(document).ready(function() {
+    // Обработчик события для кнопки "Играть"
+    $('#play-button').click(function() {
+      // Генерируем случайный суффикс
+      var suffix = generateSuffix();
+      // Перенаправляем пользователя на страницу с сгенерированным суффиксом
+      window.location.pathname = '/game/' + suffix + '/';
+    });
+
+    // Функция для генерации случайного суффикса
+    function generateSuffix() {
+      var suffix = Math.random().toString(36).substring(7);
+      return suffix;
+    }
+  });
+</script>
+
 
   </body>
   </html>

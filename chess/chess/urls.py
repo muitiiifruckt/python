@@ -5,8 +5,6 @@ from django.contrib.auth.views import LogoutView
 from app import views
 
 
-
-
 urlpatterns = [
 
     path('logout/', LogoutView.as_view(), name='logout'),
@@ -20,4 +18,5 @@ urlpatterns = [
     path('news', views.news),
     path('make_move', views.make_move, name='make_move'),
     path('signup/', views.registration, name='registration'),
+    path('<str:suffix>/', views.game, name='game'),
 ]

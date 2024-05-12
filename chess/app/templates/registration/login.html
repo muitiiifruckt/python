@@ -1,40 +1,99 @@
 {% extends "base_generic.html" %}
 
 {% block content %}
+<style>
+  /* CSS for centering the form and adjusting its position */
+  body {
+    background-color: #e6fada; /* Light gray background for the entire page */
+  }
+  .center-form {
+    position: absolute;
+    top: 70%;
+    left: 20%;
 
-{% if form.errors %}
-  <p>Your username and password didn't match. Please try again.</p>
-{% endif %}
+    width: 40%; /* Adjust the width as needed */
+    padding: 20px;
+    background-color: #f0f0f0; /* Light gray background */
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Soft shadow */
+    margin-top: 200px;
+  }
 
-{% if next %}
-  {% if user.is_authenticated %}
-    <p>Your account doesn't have access to this page. To proceed,
-    please login with an account that has access.</p>
-  {% else %}
-    <p>Please login to see this page.</p>
+
+  /* Style for form labels */
+  label {
+    display: inline-block;
+    width: 120px; /* Adjust label width as needed */
+    font-weight: bold;
+    color: #333; /* Dark gray text color */
+    margin-bottom: 10px;
+  }
+
+  /* Style for form input fields */
+  input[type="text"],
+  input[type="password"] {
+    width: calc(100% - 130px); /* Adjust input field width */
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc; /* Light gray border */
+    border-radius: 5px;
+    box-sizing: border-box; /* Ensure padding is included in width */
+  }
+
+  /* Style for submit button */
+  input[type="submit"] {
+    width: 100%;
+    padding: 10px;
+    background-color: #4caf50; /* Green background */
+    color: white; /* White text color */
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease; /* Smooth transition */
+  }
+
+  /* Hover effect for submit button */
+  input[type="submit"]:hover {
+    background-color: #45a049; /* Darker green on hover */
+  }
+
+  /* Style for "Lost password?" link */
+  p a {
+    color: #4caf50; /* Green link color */
+    text-decoration: none;
+  }
+
+  /* Style for error messages */
+  .error-message {
+    color: #ff0000; /* Red text color */
+  }
+</style>
+
+<div class="center-form">
+  {% if form.errors %}
+    <p class="error-message">Your username and password didn't match. Please try again.</p>
   {% endif %}
-{% endif %}
 
-<form method="post" action="{% url 'login' %}">
-{% csrf_token %}
-<table>
+  {% if next %}
+    {% if user.is_authenticated %}
+      <p class="error-message">Your account doesn't have access to this page. To proceed, please login with an account that has access.</p>
+    {% else %}
+      <p class="error-message">Please login to see this page.</p>
+    {% endif %}
+  {% endif %}
 
-<tr>
-  <td>{{ form.username.label_tag }}</td>
-  <td>{{ form.username }}</td>
-</tr>
+  <form method="post" action="{% url 'login' %}">
+    {% csrf_token %}
+    <label for="id_username">Username:</label>
+    {{ form.username }}
+    <br>
+    <label for="id_password">Password:</label>
+    {{ form.password }}
+    <br>
+    <input type="submit" value="Login" />
+    <input type="hidden" name="next" value="{{ next }}" />
+  </form>
 
-<tr>
-  <td>{{ form.password.label_tag }}</td>
-  <td>{{ form.password }}</td>
-</tr>
-</table>
-
-<input type="submit" value="login" />
-<input type="hidden" name="next" value="{{ next }}" />
-</form>
-
-{# Assumes you setup the password_reset view in your URLconf #}
-<p><a href="{% url 'password_reset' %}">Lost password?</a></p>
-
+  <p><a href="{% url 'password_reset' %}">Lost password?</a></p>
+</div>
 {% endblock %}

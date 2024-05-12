@@ -15,20 +15,76 @@
     <link rel="stylesheet" href="{% static 'css/styles.css' %}" />
   </head>
 
-  <body>
-    <div class="container-fluid">
-      <div class="row">
-        <div class="col-sm-2">
-          {% block sidebar %}
-            <ul class="sidebar-nav">
-              <li><a href="{% url 'index' %}">Home</a></li>
-              <li><a href="">All books</a></li>
-              <li><a href="">All authors</a></li>
-            </ul>
-          {% endblock %}
-        </div>
-        <div class="col-sm-10 ">{% block content %}{% endblock %}</div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Green & White Website</title>
+  <style>
+    /* Зеленый цвет */
+    .green {
+      background-color: #2ecc71;
+      color: #fff;
+    }
+
+    /* Белый цвет */
+    .white {
+      background-color: #fff;
+      color: #000;
+    }
+
+    /* Расположение контента */
+    .col-sm-2 {
+      /* Ширина колонки */
+      width: 16.6667%;
+    }
+
+    .col-sm-10 {
+      /* Ширина колонки */
+      width: 83.3333%;
+      border-radius: 20px;
+    }
+
+    /* Стили для боковой панели */
+    .sidebar-nav {
+      list-style-type: none;
+      padding: 0;
+      border-radius: 20px;
+
+
+    }
+
+    .sidebar-nav li {
+      padding: 10px 0;
+    }
+
+    .sidebar-nav li a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    /* Полная высота контейнера */
+    .container-fluid {
+      height: 100vh;
+    }
+  </style>
+</head>
+<body>
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Боковая панель -->
+      <div class="col-sm-2 green">
+        {% block sidebar %}
+          <ul class="sidebar-nav">
+            <li><a href="{% url 'index' %}">Home</a></li>
+          </ul>
+        {% endblock %}
       </div>
+      <!-- Основное содержимое -->
+      <div class="col-sm-10 white">{% block content %}{% endblock %}</div>
     </div>
-  </body>
+  </div>
+</body>
 </html>
+

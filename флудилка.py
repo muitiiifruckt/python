@@ -106,7 +106,9 @@ def count_delta(table,c): # возвращается индексы что на 
 
     max_delta = max(delta_list[1:])
     if(max_delta<=0):
+        print()
         print(delta_list)
+        print()
         return False
     else:
         return True
@@ -155,6 +157,7 @@ def simplex(c,A,b,znaki,dlina_basisa):
     index_of_last_basis = 0
 
     while count_delta(table,c) :
+        print()
         for i in range(len(table)):
             print(table[i])
         index_of_poloz_delta, index_of_last_basis = count_delta_and_index_out_and_in(table,c)
@@ -279,14 +282,16 @@ delta_list = list()
 # Задаем входные параметры  для целевой, мин/макс , ограничения, правая сторона ограничений , знаки
 minimization = False
 
-c = [3,10,10,18]           # Целевая функция
-A = [ [2,1,4,10],        # Ограничения
-      [2,1,4,2],
-      [10,10,20,50]
+c = [55,3]           # Целевая функция
+A = [ [1,2],        # Ограничения
+      [1,1],
+      [2,3],
+      [1,0],
+      [0,1]
       ]
 
-b = [10000,10000,0]              # Вектор Р0
-znaki = [-1,-1,-1]          # знаки   -1 is <=  // 0 is  =  // 1 is  >=
+b = [4,5,6,7,3]              # Вектор Р0
+znaki = [1,1,1,-1,-1]          # знаки   -1 is <=  // 0 is  =  // 1 is  >=
 cc = copy.deepcopy(c)
 AA = copy.deepcopy(A)
 bb = copy.deepcopy(b)

@@ -1,3 +1,5 @@
+
+
 let promotion ;
 let tempFromCoord, tempToCoord, tempId,draggedElement_2,targetSquare,board;
 
@@ -11,7 +13,7 @@ let tempFromCoord, tempToCoord, tempId,draggedElement_2,targetSquare,board;
     element.addEventListener('dragend', (e) => {
         e.target.style.opacity = '';
     });
-}
+          }
 function addPiece(piece, position) {
             const pieceElement = document.createElement('img');
             pieceElement.src = '/static/figures/' + piece + '.png';
@@ -570,16 +572,5 @@ $(document).ready(function() {
 
             board.children[position].appendChild(pieceElement_2);
         }
-
-
-
-
-
-
-
-
-
-
-
     createChessBoard();
 });
