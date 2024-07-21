@@ -26,10 +26,10 @@ def game(request):
     return render(request, "html/game.html")
 
 def about(request):
-    return HttpResponse("<h2>Этот сайт является курсовой работой Муртазина Айзата Радиковича 09-141</h2>")
+    return render(request,"html/news.html")
 
 def news(request):
-    return HttpResponse("<h2>NEWs</h2>")
+    return render(request, "html/info.html")
 def contact(request):
     return HttpResponse("<h2>Настройки</h2>")
 def signup(request):

@@ -60,5 +60,3 @@ class ChessLogic:
         return False
     def hangle_move(self):
         pass
-
-    # Другие методы для управления игровой логикой...

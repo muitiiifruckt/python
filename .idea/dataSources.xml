@@ -8,5 +8,12 @@
       <jdbc-url>jdbc:sqlite:C:\Users\aayza\PycharmProjects\Учебные проекты на пайтон\chess\db.sqlite3</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
+    <data-source source="LOCAL" name="search_history" uuid="a5944dd4-7a67-4154-b874-a01c6b6c0c3f">
+      <driver-ref>sqlite.xerial</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
+      <jdbc-url>jdbc:sqlite:C:\Users\aayza\PycharmProjects\Учебные проекты на пайтон\python\weather\instance\search_history.db</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
   </component>
 </project>
