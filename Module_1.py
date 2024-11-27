@@ -62,7 +62,7 @@ def main():
         for i, link in enumerate(info_links):
             try:
                 driver.execute_script("arguments[0].click();", link)
-                print(f"Клик по кнопке {i + 1} из {len(info_links)}")
+                logger.info(f"Клик по кнопке {i + 1} из {len(info_links)}")
                 time.sleep(TIME_WAIT_BETWEEN_OPEN_NEW_WINDOW)
 
 
